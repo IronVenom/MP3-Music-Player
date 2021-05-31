@@ -399,13 +399,148 @@ def createPlaylist():
     con.commit()
     con.close()
 
-def uploadPlaylist():
-    # check all file paths before uploading, messagebox to confirm upload, error message box if file doesnt exist
-    pass
+def undoDisableState(event):
+
+    playlistMenu.entryconfigure(1, state=ACTIVE)
+    playlistMenu.entryconfigure(2, state=ACTIVE)
+
+def loadSelectedPlaylist(selectedPlaylist, loadPlaylistWindow):
+
+    global songDirectory
+    global songCounter
+
+    removeAllSongs()
+
+    con = sqlite3.connect("musicPlayerPlaylists.db")
+    c = con.cursor()
+
+    c.execute('''SELECT playlistID FROM PLAYLISTS WHERE playlistName=:pLN''',{"pLN":selectedPlaylist})
+    selectedPlaylistID = c.fetchall()
+    selectedPlaylistID = selectedPlaylistID[0][0]
+
+    c.execute('''SELECT * FROM PLAYLIST_SONGS WHERE playlistID=:pLID''',{"pLID":selectedPlaylistID})
+    songsOfPlaylist = c.fetchall()
+    
+    songIDsOfPlaylist = [i[2] for i in songsOfPlaylist]
+    songPosOfPlaylist = [i[3] for i in songsOfPlaylist]
+
+    tempSongDirectory = {}
+    tempCounter = 0
+    for id in songIDsOfPlaylist:
+        c.execute('''SELECT * FROM SONGS WHERE songID=:sID''',{"sID":id})
+        dets = c.fetchall()
+        dets = dets[0]
+        currentSong = {}
+        currentSong["name"] = dets[1]
+        currentSong["path"] = dets[2]
+        tempSongDirectory[songPosOfPlaylist[tempCounter]] = currentSong
+        tempCounter = tempCounter + 1
+
+    songDirectory = tempSongDirectory
+    songCounter = len(songIDsOfPlaylist)
+    for k in songDirectory.keys():
+        songsList.insert(END, songDirectory[k]["name"])
+
+    con.commit()
+    con.close()
+    loadPlaylistWindow.destroy()
+
+def loadPlaylist():
+
+    playlistMenu.entryconfigure(1, state=DISABLED)
+    playlistMenu.entryconfigure(2, state=DISABLED)
+    loadPlaylistWindow = Toplevel(root)
+    loadPlaylistWindow.title("Load a Playlist")
+    if(platform.system() == "Windows"):
+        loadPlaylistWindow.iconbitmap("assets/appicon.ico")
+    elif(platform.system() == "Darwin"):
+        loadPlaylistWindow.iconbitmap("assets/appicon.icns")
+    else:
+        loadPlaylistWindow.iconbitmap("assets/appicon.xbm")
+    loadPlaylistWindow.geometry("500x650")
+    loadPlaylistWindow.resizable(width=0,height=0)
+    loadPlaylistWindow.bind("<Destroy>", undoDisableState)
+
+    loadFrame = ttk.Frame(loadPlaylistWindow)
+    loadFrame.grid(row=0, column=0, sticky=(N, S, E, W))
+    uploadInfoLabel = ttk.Label(loadFrame, text="Select the playlist to be loaded and click on the Load Playlist button", anchor=CENTER)
+    uploadInfoLabel.pack(side=TOP, pady=30)
+    playlistsListBox = Listbox(loadFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20)
+    playlistsListBox.pack(fill=BOTH, padx=20)
+    confirmButton = ttk.Button(loadFrame, text="Load Playlist", command=lambda : loadSelectedPlaylist(playlistsListBox.get(ACTIVE), loadPlaylistWindow))
+    confirmButton.pack(side=TOP, pady=30)
+    loadPlaylistWindow.rowconfigure(0, weight=1)
+    loadPlaylistWindow.columnconfigure(0, weight=1)
+
+    con = sqlite3.connect("musicPlayerPlaylists.db")
+    c = con.cursor()
+
+    c.execute('''SELECT * FROM PLAYLISTS''')
+    listOfPlaylists = c.fetchall()
+    listOfPlaylists = [i[1] for i in listOfPlaylists]
+
+    for k in listOfPlaylists:
+        playlistsListBox.insert(END, k)
+
+    con.commit()
+    con.close()
+
+def deleteSelectedPlaylist(selectedPlaylist, deletePlaylistWindow):
+    
+    con = sqlite3.connect("musicPlayerPlaylists.db")
+    c = con.cursor()
+
+    c.execute('''SELECT playlistID FROM PLAYLISTS WHERE playlistName=:pLN''',{"pLN":selectedPlaylist})
+    selectedPlaylistID = c.fetchall()
+    selectedPlaylistID = selectedPlaylistID[0][0]
+
+    c.execute('''DELETE FROM PLAYLIST_SONGS WHERE playlistID=:pLID''',{"pLID":selectedPlaylistID})
+    c.execute('''DELETE FROM PLAYLISTS WHERE playlistName=:pLN''',{"pLN":selectedPlaylist})
+
+    con.commit()
+    con.close()
+    deletePlaylistWindow.destroy()
 
 def deletePlaylist():
-    # open new window for playlist deletion, messagebox to confirm deletion
-    pass
+
+    playlistMenu.entryconfigure(1, state=DISABLED)
+    playlistMenu.entryconfigure(2, state=DISABLED)
+    deletePlaylistWindow = Toplevel(root)
+    deletePlaylistWindow.title("Delete a Playlist")
+    if(platform.system() == "Windows"):
+        deletePlaylistWindow.iconbitmap("assets/appicon.ico")
+    elif(platform.system() == "Darwin"):
+        deletePlaylistWindow.iconbitmap("assets/appicon.icns")
+    else:
+        deletePlaylistWindow.iconbitmap("assets/appicon.xbm")
+    deletePlaylistWindow.geometry("500x650")
+    deletePlaylistWindow.resizable(width=0, height=0)
+    deletePlaylistWindow.bind("<Destroy>", undoDisableState)
+
+    deleteFrame = ttk.Frame(deletePlaylistWindow)
+    deleteFrame.grid(row=0, column=0, sticky=(N, S, E, W))
+    deleteInfoLabel = ttk.Label(deleteFrame, text="Select the playlist to be deleted and click on the Delete Playlist button", anchor=CENTER)
+    deleteInfoLabel.pack(side=TOP, pady=30)
+    playlistsListBox = Listbox(deleteFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20)
+    playlistsListBox.pack(fill=BOTH, padx=20)
+    confirmButton = ttk.Button(deleteFrame, text="Delete Playlist", command=lambda : deleteSelectedPlaylist(playlistsListBox.get(ACTIVE), deletePlaylistWindow))
+    confirmButton.pack(side=TOP, pady=30)
+    deletePlaylistWindow.rowconfigure(0, weight=1)
+    deletePlaylistWindow.columnconfigure(0, weight=1)
+
+    con = sqlite3.connect("musicPlayerPlaylists.db")
+    c = con.cursor()
+
+    c.execute('''SELECT * FROM PLAYLISTS''')
+    listOfPlaylists = c.fetchall()
+    listOfPlaylists = [i[1] for i in listOfPlaylists]
+
+    for k in listOfPlaylists:
+        playlistsListBox.insert(END, k)
+
+    con.commit()
+    con.close()
+
 # <--------------------------------------------------------------------------->
 
 # Global Variables
@@ -457,7 +592,7 @@ subframe1 = ttk.Frame(mainframe, padding="5", borderwidth=2, relief="solid")
 subframe1.grid(row=0, column=0, sticky=(N, E, S, W), padx=10, pady=10)
 
 # Song Information Label
-songInfo = ttk.Label(subframe1, text="No Song Selected", borderwidth=2, relief="solid")
+songInfo = ttk.Label(subframe1, text="No Song Selected")
 songInfo.grid(row=0, column=0, sticky=(N, E, S, W))
 
 # Button Set 1 
@@ -524,8 +659,8 @@ songsMenu.add_command(label="Remove All Songs", command=removeAllSongs)
 playlistMenu = Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Playlists", menu=playlistMenu)
 playlistMenu.add_command(label="Create Playlist from songs present in Playlist Box", command=createPlaylist)
-playlistMenu.add_command(label="Delete Playlist")
-playlistMenu.add_command(label="Upload Playlist")
+playlistMenu.add_command(label="Delete a Playlist", command=deletePlaylist)
+playlistMenu.add_command(label="Load a Playlist", command=loadPlaylist)
 
 appearanceMenu = Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Appearance", menu=appearanceMenu)
