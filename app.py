@@ -475,8 +475,15 @@ def loadPlaylist():
     loadFrame.grid(row=0, column=0, sticky=(N, S, E, W))
     uploadInfoLabel = ttk.Label(loadFrame, text="Select the playlist to be loaded and click on the Load Playlist button", anchor=CENTER)
     uploadInfoLabel.pack(side=TOP, pady=30)
-    playlistsListBox = Listbox(loadFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20)
-    playlistsListBox.pack(fill=BOTH, padx=20)
+    scrollLFrame = ttk.Frame(loadFrame)
+    scrollLFrame.pack(fill=BOTH, padx=20)
+    playlistsListBox = Listbox(scrollLFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20, width=39)
+    playlistsListBox.pack(side=LEFT, fill=BOTH)
+    scrollbarLoad = ttk.Scrollbar(scrollLFrame, orient=VERTICAL, command=playlistsListBox.yview)
+    scrollbarLoad.pack(side=RIGHT,fill=Y)
+    playlistsListBox.config(yscrollcommand=scrollbarLoad.set)
+    
+
     confirmButton = ttk.Button(loadFrame, text="Load Playlist", command=lambda : loadSelectedPlaylist(playlistsListBox.get(ACTIVE), loadPlaylistWindow))
     confirmButton.pack(side=TOP, pady=30)
     loadPlaylistWindow.rowconfigure(0, weight=1)
@@ -547,8 +554,15 @@ def deletePlaylist():
     deleteFrame.grid(row=0, column=0, sticky=(N, S, E, W))
     deleteInfoLabel = ttk.Label(deleteFrame, text="Select the playlist to be deleted and click on the Delete Playlist button", anchor=CENTER)
     deleteInfoLabel.pack(side=TOP, pady=30)
-    playlistsListBox = Listbox(deleteFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20)
-    playlistsListBox.pack(fill=BOTH, padx=20)
+
+    scrollDFrame = ttk.Frame(deleteFrame)
+    scrollDFrame.pack(fill=BOTH, padx=20)
+    playlistsListBox = Listbox(scrollDFrame, activestyle="none", font=(font.nametofont("TkDefaultFont"),14), height=20, width=39)
+    playlistsListBox.pack(side=LEFT, fill=BOTH)
+    scrollbarLoad = ttk.Scrollbar(scrollDFrame, orient=VERTICAL, command=playlistsListBox.yview)
+    scrollbarLoad.pack(side=RIGHT,fill=Y)
+    playlistsListBox.config(yscrollcommand=scrollbarLoad.set)
+
     confirmButton = ttk.Button(deleteFrame, text="Delete Playlist", command=lambda : deleteSelectedPlaylist(playlistsListBox.get(ACTIVE), deletePlaylistWindow))
     confirmButton.pack(side=TOP, pady=30)
     deletePlaylistWindow.rowconfigure(0, weight=1)
@@ -685,6 +699,9 @@ subframe2 = ttk.Labelframe(mainframe, labelwidget=labelForPlaylistFrame, borderw
 subframe2.grid(row=0, column=1, sticky=(N, E, S, W), padx=10, pady=10)
 songsList = Listbox(subframe2, activestyle="none", font=(font.nametofont("TkDefaultFont"),14))
 songsList.grid(row=0, column=0, sticky=(N, S, E, W))
+scroll = ttk.Scrollbar(subframe2, orient=VERTICAL, command=songsList.yview)
+scroll.grid(row=0,column=1,sticky=(N, S))
+songsList.config(yscrollcommand=scroll.set)
 
 # Menu
 menubar = Menu(root, tearoff=False)
