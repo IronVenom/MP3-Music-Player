@@ -423,7 +423,7 @@ def loadSelectedPlaylist(selectedPlaylist, loadPlaylistWindow):
     
     songIDsOfPlaylist = [i[2] for i in songsOfPlaylist]
     songPosOfPlaylist = [i[3] for i in songsOfPlaylist]
-
+    songExistsFlag = True
     tempSongDirectory = {}
     tempCounter = 0
     for id in songIDsOfPlaylist:
@@ -433,17 +433,27 @@ def loadSelectedPlaylist(selectedPlaylist, loadPlaylistWindow):
         currentSong = {}
         currentSong["name"] = dets[1]
         currentSong["path"] = dets[2]
-        tempSongDirectory[songPosOfPlaylist[tempCounter]] = currentSong
-        tempCounter = tempCounter + 1
+        if os.path.exists(currentSong["path"]):
+            tempSongDirectory[songPosOfPlaylist[tempCounter]] = currentSong
+            tempCounter = tempCounter + 1
+        else:
+            songExistsFlag = False
+            songName=currentSong["name"]
+            con.commit()
+            con.close()
+            loadPlaylistWindow.destroy()
+            messagebox.showerror(title="Error",message=f"The file {songName}  present in the playist - {selectedPlaylist} no longer exists. The file has been moved to a new location or has been deleted. Please DELETE THIS PLAYLIST to avoid any further errors.")
+            break
 
-    songDirectory = tempSongDirectory
-    songCounter = len(songIDsOfPlaylist)
-    for k in songDirectory.keys():
-        songsList.insert(END, songDirectory[k]["name"])
+    if songExistsFlag:
+        songDirectory = tempSongDirectory
+        songCounter = len(songIDsOfPlaylist)
+        for k in songDirectory.keys():
+            songsList.insert(END, songDirectory[k]["name"])
 
-    con.commit()
-    con.close()
-    loadPlaylistWindow.destroy()
+        con.commit()
+        con.close()
+        loadPlaylistWindow.destroy()
 
 def loadPlaylist():
 
@@ -475,15 +485,31 @@ def loadPlaylist():
     con = sqlite3.connect("musicPlayerPlaylists.db")
     c = con.cursor()
 
-    c.execute('''SELECT * FROM PLAYLISTS''')
-    listOfPlaylists = c.fetchall()
-    listOfPlaylists = [i[1] for i in listOfPlaylists]
+    try: 
 
-    for k in listOfPlaylists:
-        playlistsListBox.insert(END, k)
+        c.execute('''SELECT * FROM PLAYLISTS''')
+        listOfPlaylists = c.fetchall()
+        listOfPlaylists = [i[1] for i in listOfPlaylists]
 
-    con.commit()
-    con.close()
+        if len(listOfPlaylists) != 0:
+            for k in listOfPlaylists:
+                playlistsListBox.insert(END, k)
+
+            con.commit()
+            con.close()
+        
+        else:
+            con.commit()
+            con.close()
+            loadPlaylistWindow.destroy()
+            messagebox.showerror(title="Error",message="No playlists have been created yet.")
+
+    except:
+
+        con.commit()
+        con.close()
+        loadPlaylistWindow.destroy()
+        messagebox.showerror(title="Error",message="No playlists have been created yet.")
 
 def deleteSelectedPlaylist(selectedPlaylist, deletePlaylistWindow):
     
@@ -531,15 +557,31 @@ def deletePlaylist():
     con = sqlite3.connect("musicPlayerPlaylists.db")
     c = con.cursor()
 
-    c.execute('''SELECT * FROM PLAYLISTS''')
-    listOfPlaylists = c.fetchall()
-    listOfPlaylists = [i[1] for i in listOfPlaylists]
+    try:
 
-    for k in listOfPlaylists:
-        playlistsListBox.insert(END, k)
+        c.execute('''SELECT * FROM PLAYLISTS''')
+        listOfPlaylists = c.fetchall()
+        listOfPlaylists = [i[1] for i in listOfPlaylists]
 
-    con.commit()
-    con.close()
+        if len(listOfPlaylists) != 0:
+            for k in listOfPlaylists:
+                playlistsListBox.insert(END, k)
+
+            con.commit()
+            con.close()
+
+        else:
+            con.commit()
+            con.close()
+            deletePlaylistWindow.destroy()
+            messagebox.showerror(title="Error",message="No playlists have been created yet.")
+
+    except:
+
+        con.commit()
+        con.close()
+        deletePlaylistWindow.destroy()
+        messagebox.showerror(title="Error",message="No playlists have been created yet.")
 
 # <--------------------------------------------------------------------------->
 
