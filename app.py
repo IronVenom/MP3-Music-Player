@@ -318,8 +318,15 @@ def shufflePlaylist():
     for k in songDirectory.keys():
         songsList.insert(END, songDirectory[k]["name"])
 
-def createPlaylist():
+def undoDisableState(event):
+    playlistMenu.entryconfigure(0, state=ACTIVE)
+    playlistMenu.entryconfigure(1, state=ACTIVE)
+    playlistMenu.entryconfigure(2, state=ACTIVE)
+    appearanceMenu.entryconfigure(0, state=ACTIVE)
+    appearanceMenu.entryconfigure(1, state=ACTIVE)
 
+def createPlaylist():
+    
     global songDirectory
     global songCounter
     if songCounter == 0:
@@ -352,7 +359,8 @@ def createPlaylist():
 
     enteredPlayListName = None
     enteredPlayListName = ask_string(title="Playlist Name", prompt="Enter a name for the playlist : ")
-    enteredPlayListName = enteredPlayListName.strip() # remove leading and trailing whitespaces to avoid empty playlist names
+    if enteredPlayListName != None:
+        enteredPlayListName = enteredPlayListName.strip() # remove leading and trailing whitespaces to avoid empty playlist names
     c.execute('''SELECT playlistName FROM PLAYLISTS''')
     checkIfPlaylistExists = c.fetchall()
     checkIfPlaylistExists = [i[0] for i in checkIfPlaylistExists]
@@ -398,11 +406,6 @@ def createPlaylist():
 
     con.commit()
     con.close()
-
-def undoDisableState(event):
-
-    playlistMenu.entryconfigure(1, state=ACTIVE)
-    playlistMenu.entryconfigure(2, state=ACTIVE)
 
 def loadSelectedPlaylist(selectedPlaylist, loadPlaylistWindow):
 
@@ -456,9 +459,11 @@ def loadSelectedPlaylist(selectedPlaylist, loadPlaylistWindow):
         loadPlaylistWindow.destroy()
 
 def loadPlaylist():
-
+    playlistMenu.entryconfigure(0, state=DISABLED)
     playlistMenu.entryconfigure(1, state=DISABLED)
     playlistMenu.entryconfigure(2, state=DISABLED)
+    appearanceMenu.entryconfigure(0, state=DISABLED)
+    appearanceMenu.entryconfigure(1, state=DISABLED)
     loadPlaylistWindow = Toplevel(root)
     loadPlaylistWindow.title("Load a Playlist")
     if(platform.system() == "Windows"):
@@ -483,6 +488,10 @@ def loadPlaylist():
     scrollbarLoad.pack(side=RIGHT,fill=Y)
     playlistsListBox.config(yscrollcommand=scrollbarLoad.set)
     
+    if(currentModeOpt.get()=="dark"):
+        playlistsListBox.configure(background="#222831", selectbackground="#00adb5", foreground="#eeeeee", selectforeground="#222831")
+    else:
+        playlistsListBox.configure(background="#faf1e6", selectbackground="#eba83a", foreground="#222831", selectforeground="#eeeeee")
 
     confirmButton = ttk.Button(loadFrame, text="Load Playlist", command=lambda : loadSelectedPlaylist(playlistsListBox.get(ACTIVE), loadPlaylistWindow))
     confirmButton.pack(side=TOP, pady=30)
@@ -535,9 +544,11 @@ def deleteSelectedPlaylist(selectedPlaylist, deletePlaylistWindow):
     deletePlaylistWindow.destroy()
 
 def deletePlaylist():
-
+    playlistMenu.entryconfigure(0, state=DISABLED)
     playlistMenu.entryconfigure(1, state=DISABLED)
     playlistMenu.entryconfigure(2, state=DISABLED)
+    appearanceMenu.entryconfigure(0, state=DISABLED)
+    appearanceMenu.entryconfigure(1, state=DISABLED)
     deletePlaylistWindow = Toplevel(root)
     deletePlaylistWindow.title("Delete a Playlist")
     if(platform.system() == "Windows"):
@@ -562,6 +573,11 @@ def deletePlaylist():
     scrollbarLoad = ttk.Scrollbar(scrollDFrame, orient=VERTICAL, command=playlistsListBox.yview)
     scrollbarLoad.pack(side=RIGHT,fill=Y)
     playlistsListBox.config(yscrollcommand=scrollbarLoad.set)
+
+    if(currentModeOpt.get()=="dark"):
+        playlistsListBox.configure(background="#222831", selectbackground="#00adb5", foreground="#eeeeee", selectforeground="#222831")
+    else:
+        playlistsListBox.configure(background="#faf1e6", selectbackground="#eba83a", foreground="#222831", selectforeground="#eeeeee")
 
     confirmButton = ttk.Button(deleteFrame, text="Delete Playlist", command=lambda : deleteSelectedPlaylist(playlistsListBox.get(ACTIVE), deletePlaylistWindow))
     confirmButton.pack(side=TOP, pady=30)
@@ -597,6 +613,23 @@ def deletePlaylist():
         deletePlaylistWindow.destroy()
         messagebox.showerror(title="Error",message="No playlists have been created yet.")
 
+def darkMode():
+    currentModeOpt.set(value="dark")
+    styleconfig.configure("TFrame", background="#222831")
+    styleconfig.configure("TLabelframe", background="#222831")
+    styleconfig.configure("TLabel", foreground="#eeeeee", background="#222831")
+    styleconfig.configure("Horizontal.TScale", background="#222831")
+    songsList.configure(background="#222831", selectbackground="#00adb5", foreground="#eeeeee", selectforeground="#222831")
+
+
+def lightMode():
+    currentModeOpt.set(value="light")
+    styleconfig.configure("TFrame", background="#faf1e6")
+    styleconfig.configure("TLabelframe", background="#faf1e6")
+    styleconfig.configure("TLabel", foreground="#222831", background="#faf1e6")
+    styleconfig.configure("Horizontal.TScale", background="#faf1e6")
+    songsList.configure(background="#faf1e6", selectbackground="#eba83a", foreground="#222831", selectforeground="#eeeeee")
+
 # <--------------------------------------------------------------------------->
 
 # Global Variables
@@ -630,11 +663,6 @@ muteLabelImage = PhotoImage(file="assets/speaker-off.png")
 # Appearance
 styleconfig = ttk.Style()
 styleconfig.configure("TLabel", font=(font.nametofont("TkDefaultFont"),12), anchor="center")
-# Light Mode
-# styleconfig.configure("TFrame", background="#f7fbfc")
-# styleconfig.configure("Dark.TFrame", background="#d6e6f2")
-# styleconfig.configure("Darker.TFrame", background="#b9d7ea")
-# styleconfig.configure("TLabel", background="#b9d7ea")
 
 # <--------------------------------------------------------------------------->
 
@@ -674,8 +702,6 @@ loopPlaylistButton = ttk.Button(buttonSet2Frame, image=loopPlaylistButtonImage, 
 loopPlaylistButton.grid(row=0, column=1, padx=10)
 shuffleButton = ttk.Button(buttonSet2Frame, image=shuffleButtonImage, text="Shuffle Playlist", compound="top", command=shufflePlaylist, width=17)
 shuffleButton.grid(row=0, column=2, padx=10)
-# playlistInfoLabel = ttk.Label(buttonSet2Frame, text="No Playlist Selected", borderwidth=2, relief="solid", padding="5 10 5 10")
-# playlistInfoLabel.grid(row=0, column=3, columnspan=2, padx=10, sticky=(N, S, E, W), pady=10)
 
 # Volume Control
 volumeControlFrame = ttk.Frame(subframe1, borderwidth=2, relief="solid", padding="2")
@@ -721,10 +747,14 @@ playlistMenu.add_command(label="Create Playlist from songs present in Playlist B
 playlistMenu.add_command(label="Delete a Playlist", command=deletePlaylist)
 playlistMenu.add_command(label="Load a Playlist", command=loadPlaylist)
 
+darkModeOpt = StringVar(value="dark")
+lightModeOpt = StringVar(value="light")
+currentModeOpt = StringVar()
+lightMode()
 appearanceMenu = Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Appearance", menu=appearanceMenu)
-appearanceMenu.add_command(label="Dark Mode")
-appearanceMenu.add_command(label="Light Mode")
+appearanceMenu.add_radiobutton(label="Dark Mode", variable=currentModeOpt, value="dark", command=darkMode)
+appearanceMenu.add_radiobutton(label="Light Mode", variable=currentModeOpt, value="light", command=lightMode)
 
 # Handling Resizing
 root.columnconfigure(0, weight=1)
@@ -749,8 +779,6 @@ buttonSet1Frame.rowconfigure(0, weight=1)
 buttonSet2Frame.columnconfigure(0, weight=1)
 buttonSet2Frame.columnconfigure(1, weight=1)
 buttonSet2Frame.columnconfigure(2, weight=1)
-# buttonSet2Frame.columnconfigure(3, weight=1)
-# buttonSet2Frame.columnconfigure(4, weight=1)
 buttonSet2Frame.rowconfigure(0, weight=1)
 volumeControlFrame.columnconfigure(0, weight=1)
 volumeControlFrame.columnconfigure(1, weight=1)
