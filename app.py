@@ -8,20 +8,28 @@ import pygame
 from mutagen.mp3 import MP3
 import random
 import os
+import sys
 import platform
 import time
 import sqlite3
 
 # <--------------------------------------------------------------------------->
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+# <--------------------------------------------------------------------------->
+
 root = Tk()
 root.title("Music Player")
 if(platform.system() == "Windows"):
-    root.iconbitmap("assets/appicon.ico")
+    root.iconbitmap(resource_path("assets/appicon.ico"))
 elif(platform.system() == "Darwin"):
-    root.iconbitmap("assets/appicon.icns")
+    root.iconbitmap(resource_path("assets/appicon.icns"))
 else:
-    root.iconbitmap("assets/appicon.xbm")
+    root.iconbitmap(resource_path("assets/appicon.xbm"))
 root.geometry("1000x600")
 pygame.mixer.init()
 
@@ -32,11 +40,11 @@ class StringDialog(simpledialog._QueryString):
     def body(self, master):
         super().body(master)
         if(platform.system() == "Windows"):
-            self.iconbitmap("assets/appicon.ico")
+            self.iconbitmap(resource_path("assets/appicon.ico"))
         elif(platform.system() == "Darwin"):
-            self.iconbitmap("assets/appicon.icns")
+            self.iconbitmap(resource_path("assets/appicon.icns"))
         else:
-            self.iconbitmap("assets/appicon.xbm")
+            self.iconbitmap(resource_path("assets/appicon.xbm"))
 
 def ask_string(title, prompt, **kargs):
     d = StringDialog(title, prompt, **kargs)
@@ -467,11 +475,11 @@ def loadPlaylist():
     loadPlaylistWindow = Toplevel(root)
     loadPlaylistWindow.title("Load a Playlist")
     if(platform.system() == "Windows"):
-        loadPlaylistWindow.iconbitmap("assets/appicon.ico")
+        loadPlaylistWindow.iconbitmap(resource_path("assets/appicon.ico"))
     elif(platform.system() == "Darwin"):
-        loadPlaylistWindow.iconbitmap("assets/appicon.icns")
+        loadPlaylistWindow.iconbitmap(resource_path("assets/appicon.icns"))
     else:
-        loadPlaylistWindow.iconbitmap("assets/appicon.xbm")
+        loadPlaylistWindow.iconbitmap(resource_path("assets/appicon.xbm"))
     loadPlaylistWindow.geometry("500x650")
     loadPlaylistWindow.resizable(width=0,height=0)
     loadPlaylistWindow.bind("<Destroy>", undoDisableState)
@@ -552,11 +560,11 @@ def deletePlaylist():
     deletePlaylistWindow = Toplevel(root)
     deletePlaylistWindow.title("Delete a Playlist")
     if(platform.system() == "Windows"):
-        deletePlaylistWindow.iconbitmap("assets/appicon.ico")
+        deletePlaylistWindow.iconbitmap(resource_path("assets/appicon.ico"))
     elif(platform.system() == "Darwin"):
-        deletePlaylistWindow.iconbitmap("assets/appicon.icns")
+        deletePlaylistWindow.iconbitmap(resource_path("assets/appicon.icns"))
     else:
-        deletePlaylistWindow.iconbitmap("assets/appicon.xbm")
+        deletePlaylistWindow.iconbitmap(resource_path("assets/appicon.xbm"))
     deletePlaylistWindow.geometry("500x650")
     deletePlaylistWindow.resizable(width=0, height=0)
     deletePlaylistWindow.bind("<Destroy>", undoDisableState)
@@ -647,16 +655,16 @@ global listIsLooped
 listIsLooped = False
 
 # Assets
-playButtonImage = PhotoImage(file="assets/play-button.png")
-pauseButtonIimage = PhotoImage(file="assets/pause-button.png")
-nextButtonImage = PhotoImage(file="assets/next-button.png")
-prevButtonImage = PhotoImage(file="assets/previous-button.png")
-stopButtonImage = PhotoImage(file="assets/stop-button.png")
-loopSongButtonImage = PhotoImage(file="assets/loopsong.png")
-loopPlaylistButtonImage = PhotoImage(file="assets/loop.png")
-shuffleButtonImage = PhotoImage(file="assets/shuffle.png")
-volumeLabelImage = PhotoImage(file="assets/speaker.png")
-muteLabelImage = PhotoImage(file="assets/speaker-off.png")
+playButtonImage = PhotoImage(file=resource_path("assets/play-button.png"))
+pauseButtonIimage = PhotoImage(file=resource_path("assets/pause-button.png"))
+nextButtonImage = PhotoImage(file=resource_path("assets/next-button.png"))
+prevButtonImage = PhotoImage(file=resource_path("assets/previous-button.png"))
+stopButtonImage = PhotoImage(file=resource_path("assets/stop-button.png"))
+loopSongButtonImage = PhotoImage(file=resource_path("assets/loopsong.png"))
+loopPlaylistButtonImage = PhotoImage(file=resource_path("assets/loop.png"))
+shuffleButtonImage = PhotoImage(file=resource_path("assets/shuffle.png"))
+volumeLabelImage = PhotoImage(file=resource_path("assets/speaker.png"))
+muteLabelImage = PhotoImage(file=resource_path("assets/speaker-off.png"))
 
 # <--------------------------------------------------------------------------->
 
