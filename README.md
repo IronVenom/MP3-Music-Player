@@ -9,3 +9,5 @@ A MP3 Music Player made using Python, Tkinter, and SQLite. A standalone executab
 * Songs Menu - Browse songs on the system and add them to the playlist, or remove songs from the playlist
 * Playlists Menu - Users can create custom playlists, delete them or load them to the music player
 * Appearance Menu - Light and Dark mode
+
+![Picture of the GUI](musicplayer.png)
