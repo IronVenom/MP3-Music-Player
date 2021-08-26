@@ -1,6 +1,6 @@
 # MP3-Music-Player
 
-A MP3 Music Player made using Python, Tkinter, and SQLite. A standalone executable file was made using PyInstaller. The music player has the following features:
+A MP3 Music Player made using Python, Tkinter, Pygame and SQLite. A standalone executable file was made using PyInstaller. The music player has the following features:
 
 * Music control buttons - Play, Pause, Stop, Next Song, Previous Song, and Loop Song
 * Playlist Shuffle and Loop buttons
